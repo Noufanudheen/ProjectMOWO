@@ -1,0 +1,165 @@
+/* Header */
+.header {
+  overflow: hidden;
+  background-color: #3333331c;
+  position: fixed; /* Make title bar stay when scrolling */
+  top: 0;
+  height: 7vh;
+  width: 100%;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  padding: 0px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+/* Hamburger menu */
+.header a.icon {
+  color: black;
+  font-size: 20px;
+  padding: 8px;
+  margin: 0;
+  cursor: pointer;
+  position: relative;
+  transition: opacity 0.6s ease, visibility 0.6s ease;
+  opacity: 1;
+  visibility: visible;
+}
+
+.header a.icon.hidden {
+  opacity: 0;
+  visibility: hidden; /* Fully hidden when faded out */
+}
+
+.header a.icon:active {
+  background: black;
+  color: white;
+}
+
+/* Add a spinning animation to the icon */
+.icon i {
+  transition: transform 0.6s ease, opacity 0.3s ease;  /* Smooth transition */
+  margin: 10px;
+  overflow: hidden;
+}
+
+/* Spinning animation when toggling between the two icons */
+.icon.open i {
+  transform: rotate(180deg); /* Spins 180 degrees */
+}
+
+/* Logo */
+.header .logo {
+  color: black;
+  font-size: 3.5vw;
+  text-decoration: none;
+  font-weight: bold;
+  margin-left: 10px;
+  transition: margin-left 0.6s ease, font-size 0.6s ease;
+  position: relative;
+  transition: transform 0.6s ease;
+}
+
+.header .logo.hidden {
+  transform: translateX(-60px);
+}
+
+/* Links container */
+#myLinks {
+  position: fixed;
+  width: 200px;
+  left: -200px;
+  height: 100%;
+  background-color: rgba(51, 51, 51, 0.9);
+  padding: 0;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+  transition: transform 0.6s ease;
+  z-index: 1000;
+}
+
+/* Links inside menu */
+#myLinks a {
+  color: white;
+  padding: 10px 20px;
+  text-decoration: none;
+  display: block;
+}
+
+/* Highlight link on hover */
+#myLinks a:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* show while active */
+#myLinks:active {
+  display: block;
+}
+
+.notification-icon {
+  color: #333;
+  cursor: pointer;
+  font-size: 20px;
+  padding: 30px 20px;
+  position: absolute;
+  margin: 0;
+  right: 0;
+  transition: color 0.3s ease, opacity 0.6s ease, visibility 0.6s ;
+  opacity: 1;
+  visibility: visible;
+}
+
+.notification-icon.hidden {
+  opacity: 0;
+  visibility: hidden; /* Fully hidden when faded out */
+}
+
+.notification-icon:active {
+  color: #fff;
+  background-color: black;
+}
+
+.notifications-div {
+  position: fixed;
+  top: -100%;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: white;
+  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.2);
+  transition: transform 0.6s ease;
+  z-index: 50;
+  overflow-y: auto;
+  padding-top: 3.5vw;
+}
+
+.notifications-div.visible {
+  transform: translateY(100%);
+}
+
+.notifications-content {
+  padding: 20px;
+  text-align: center;
+  margin-top: 30vw;
+}
+
+.notifications-content h2 {
+  margin-top: 20px;
+  font-size: 24px;
+  color: #333;
+}
+
+.notifications-content p {
+  font-size: 16px;
+  color: #666;
+}
+
+.back-button {
+  padding: 10px;
+  color: #000;
+  font-size: 18px;
+  font-weight: bolder;
+  cursor: pointer;
+  text-align: left;
+}

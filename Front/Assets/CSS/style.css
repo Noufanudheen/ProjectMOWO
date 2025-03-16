@@ -1,0 +1,370 @@
+/* --- General Styles --- */
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background-color: #f4f4f4;
+    overflow-x: hidden;  /* Prevent horizontal scroll */
+}
+
+body.no-scroll {
+    overflow: hidden;  /* For expanded box, preventing main page scroll */
+}
+
+/* --- Admin Panel (Keep if needed, otherwise remove) --- */
+
+.admin-div {
+    position: absolute;  /* Consider if absolute positioning is truly necessary */
+    display: flex;
+    margin: 100px 20px 20px;  /* Simplify margin */
+    padding: 10px 0;
+    z-index: 100;
+    border-radius: 26px;
+    background: #555;
+    border: 2px solid #007bff;  /* Simplify border */
+    justify-content: center;
+}
+
+.admin-page {
+    text-decoration: none;
+    background: #555;
+    color: oldlace;
+}
+
+/* --- Container & Menu --- */
+
+.container {
+    transition: transform 0.6s ease;
+}
+
+.container.menu-open {
+    transform: translateX(200px);
+}
+
+.container.menu-open #myLinks {
+    display: block;
+}
+
+.container.menu-open .header .logo {
+    margin-left: 10px; /* Space for the open menu */
+}
+
+.menu-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 998;
+    cursor: pointer;
+    background: rgb(0, 0, 0);
+    
+    /* Keep display block, but start fully transparent */
+    opacity: 0;
+    visibility: hidden; 
+    transition: opacity 0.3s ease, visibility 0s linear 0.3s; 
+}
+
+/* When menu opens, fade in the backdrop */
+.menu-backdrop.menu-open {
+    opacity: 0.5;
+    visibility: visible;
+    transition: opacity 0.3s ease, visibility 0s linear 0s; 
+}
+
+.container.menu-open + .menu-backdrop { /* Show backdrop when menu is open */
+    display: block;
+}
+
+.menu button { /*  Login button in the menu */
+    position: fixed;
+    bottom: 30px;
+    width: calc(100% - 40px);
+    right: 20px;
+}
+
+.footer {
+    position: fixed;
+    bottom: -15px; /*  Consider removing negative margin */
+    color: #fff;
+    font-size: 10px;
+    text-align: center; /*Added text align center*/
+}
+
+/* --- Main Section --- */
+
+.main {
+    position: relative; /* Important for positioning child elements */
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 20px 0;
+    top: 10vw;  /*  Consider if this offset is necessary */
+    justify-content: center; /* Horizontally center the boxes */
+    align-items: center; /* Vertically center items, esp. useful if heights vary */
+}
+
+/* --- Box Styles --- */
+
+.box {
+    width: 90%;
+    height: 100px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.5s ease-in-out, top 0.5s ease-in-out;
+    cursor: pointer;
+    overflow: hidden;
+    position: relative;
+}
+
+.box.expanded h3 {
+    font-size: 24px;
+    color: #333;
+    margin-top: 11vh;
+}
+
+/* Hover effect *only* when NOT expanded */
+.box:not(.expanded):hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.1);
+}
+
+.box.expanded {
+    position: absolute;
+    width: 100vw;
+    margin-top: -7vh;
+    height: 110vh;
+    border-radius: 0;
+    box-shadow: none;
+    z-index: 10;
+    left: 0;
+    /*  top: 0;  REMOVE THIS.  JavaScript will handle positioning. */
+}
+
+/* Hide other boxes when one is expanded */
+.main.box-expanded .box:not(.expanded) {
+    opacity: 0;
+    transform: scale(0.9);
+    pointer-events: none;
+}
+
+.box-content {
+    opacity: 0;
+    visibility: hidden;
+    text-align: center;
+    transition: all 0.3s ease-in-out;
+    display: flex;          /* Make .box-content a flex container */
+    flex-direction: column; /* Stack children vertically */
+    margin-top: 50vh;
+    align-items: center;    /* Center horizontally */
+    width: 100%;            /* Ensure it fills the box */
+    height: 100%;
+}
+
+.box.expanded .box-content {
+    opacity: 1;
+    visibility: visible;
+}
+
+.bus-item {
+    display: table-row;
+    width: 90%;
+    margin-top: 10px;
+    padding: 10px;
+}
+
+/* --- Back Button --- */
+
+.back-btn {
+    display: none;  /* Hidden by default */
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    padding: 5px 10px;
+    background: #ff4b4b;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    z-index: 11;  /* Ensure it's above the expanded box */
+}
+
+.expanded .back-btn {
+    display: block; /* Show when expanded */
+}
+
+/* --- Dropdown Styles --- */
+
+.dropdown-container {
+    position: relative;
+    width: 80%; /*  Consistent width */
+    margin: 10px 0; /*  Spacing */
+}
+
+.dropdown-input,
+.search-input {  /*  Combine common styles */
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    cursor: pointer;
+    display: block; /*For search input*/
+}
+
+.dropdown-menu,
+.result-list {
+    position: absolute;
+    width: 100%;
+    background: white;
+    border: 1px solid #ccc;
+    max-height: 200px;
+    overflow-y: auto;
+    display: none; /*  Hidden by default */
+    z-index: 10;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    list-style: none; /* For result list */
+    padding: 0; /* For result list */
+    margin-top: 10px; /*For result list*/
+}
+
+.dropdown-item,
+.result-list li { /*  Style list items similarly */
+    padding: 8px;
+    cursor: pointer;
+    text-align: left;
+}
+
+.dropdown-item:hover,
+.result-list li:hover {
+    background: #f0f0f0;
+}
+
+.expanded .search-input,
+.expanded .result-list{
+    display: block;
+}
+/* --- Search Button --- */
+
+.btn {
+    padding: 10px 20px;
+    background: blue;
+    color: white;
+    border: none;
+    cursor: pointer;
+    margin-top: 10px;
+    border-radius: 5px;
+}
+
+.btn:disabled {
+    background: gray;
+    cursor: not-allowed;
+}
+
+/* --- Result Display --- */
+.bus-item {
+    display: block;  /* Use block for easy left-alignment */
+    width: 100%;       /* Control width */
+    margin: 10px -10px; /* Center horizontally (auto left/right margins) */
+    padding: 10px;
+    text-align: left;  /* Left-align the text within */
+    border-top: 1px solid #eee; /* Subtle separator */
+}
+
+/* ---  Hide Title on Expand --- */
+.box h3 {
+    position: absolute;
+    top: 13px; /*Consistent positioning */
+    font-size: 20px;
+    transition: all 0.3s ease;
+    margin: 0; /*Remove margin*/
+    color: black; /*Removed # symbol*/
+}
+
+/* --- Responsive Styles --- */
+
+@media (max-width: 600px) {
+    .box {
+        width: 95%;  /*  Full width on small screens */
+    }
+}
+
+/* --- Box Background Colors (Optional - Keep if needed) --- */
+
+#privateBus { background-color: #008cff38; }
+#publicBus { background-color: #ff990038; }
+#travelAgency { background-color: #ff000038; }
+
+/* Public Bus items */
+.BusServices {
+    max-height: 650px ; /* Adjust based on your layout */
+    overflow-y: auto; /* Enables vertical scrolling */
+    overflow-x: hidden; /* Hides horizontal scrolling */
+    scrollbar-width: thin; /* For Firefox */
+    scrollbar-color: #888 #00000000; /* Scrollbar styling for Firefox */
+}
+
+/* Custom scrollbar for WebKit browsers (Chrome, Edge, Safari) */
+.BusServices::-webkit-scrollbar {
+    width: 8px; /* Width of scrollbar */
+}
+
+.BusServices::-webkit-scrollbar-thumb {
+    background-color: #888; /* Color of the scroll thumb */
+    border-radius: 4px; /* Round corners */
+}
+
+.BusServices::-webkit-scrollbar-track {
+    background: #00000000; /* Background of scrollbar track */
+}
+
+/* Public Bus item box background */
+.item {
+    width: 500px;
+    height: 150px;
+    border: 1px solid #000;
+    border-radius: 10px;
+    margin: 10px;
+}
+
+#item-1 { 
+    background-color: #00000040; 
+}
+#item-2 { 
+    background-color: #00000020; 
+}
+#item-3 { 
+    background-color: #00000040; 
+}
+#item-4 { 
+    background-color: #00000020; 
+}
+#item-5 { 
+    background-color: #00000040; 
+}
+
+/* Public Bus items */
+.travelServices {
+    max-height: 650px ; /* Adjust based on your layout */
+    overflow-y: auto; /* Enables vertical scrolling */
+    overflow-x: hidden; /* Hides horizontal scrolling */
+    scrollbar-width: thin; /* For Firefox */
+    scrollbar-color: #888 #00000000; /* Scrollbar styling for Firefox */
+}
+
+/* Custom scrollbar for WebKit browsers (Chrome, Edge, Safari) */
+.travelServices::-webkit-scrollbar {
+    width: 8px; /* Width of scrollbar */
+}
+
+.travelServices::-webkit-scrollbar-thumb {
+    background-color: #888; /* Color of the scroll thumb */
+    border-radius: 4px; /* Round corners */
+}
+
+.travelServices::-webkit-scrollbar-track {
+    background: #00000000; /* Background of scrollbar track */
+}

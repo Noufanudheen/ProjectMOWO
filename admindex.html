@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transport Routes and Stops</title>
+    <style>
+        .hidden { display: none; }
+        .bus-row {
+            margin-bottom: 10px;
+        }
+        .stop-row {
+            margin-bottom: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        td {
+            border: 1px;
+        }
+    </style>
+</head>
+<body>
+
+    <h2><a onclick="window.close()" style="text-decoration: none; cursor: pointer;">Back</a></h2>
+    <h1>Transport Routes and Stops</h1>
+
+    <!-- Error Message -->
+    <div id="error-message" class="hidden">Error loading data.</div>
+
+    <!-- Routes Table -->
+    <h2>Routes</h2>
+    <table id="routes-table">
+        <thead>
+            <tr>
+                <th>Route Name</th>
+                <th>Route ID</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Rows will be populated here -->
+        </tbody>
+    </table>
+
+    <!-- Add Route Form -->
+    <button id="addRouteBtn">Add New Route</button>
+    <div id="routeForm" class="hidden">
+        <h3>Add New Route</h3>
+    
+        <!-- Route Name -->
+        <div id="newrouterow"></div>
+        <button id="addnewrouterow" onclick="addnewrouterow()">+</button>
+        <button id="saveRouteBtn">Save new Route</button>
+    </div>
+
+    <!-- Route Stops Section -->
+    <h2>Route Stop</h2>
+    <div>
+        <button onclick="window.open('rtst.html', '_blank'); return false;">Route Stops Table</Table></button>
+    </div><br>
+    <button id="addrtstBtn">Add New stops in a route</button>
+    <div id="rtstForm" class="hidden">
+        <h3>Add New RtStop</h3>
+        <select class="route_id" required>
+            <option value="">Select Route</option>
+            <!-- Routes will be populated dynamically here -->
+        </select><br><br>
+    
+        <!-- Route Stop Name -->
+        <div id="newrtstrow"></div>
+        <button id="addnewrtstrow" onclick="addnewrtstrow()">+</button>
+        <button id="savertstBtn">Save new stop</button>
+    </div>
+
+    <!-- Stops Table -->
+    <h2>Stops</h2>
+    <table id="stops-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Stop Name</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Rows will be populated here -->
+        </tbody>
+    </table>
+
+    <!-- Add Stop Form -->
+    <button id="addStopBtn">Add New Stop</button>
+    <div id="stopForm" class="hidden">
+        <h3>Add New Stop</h3>
+    
+        <!-- Stop Name -->
+        <div id="newstoprow"></div>
+        <button id="addnewstoprow" onclick="addnewstoprow()">+</button>
+        <button id="saveStopBtn">Save new stop</button>
+    </div>
+
+    <!-- Bus Table -->
+    <h2>Buses</h2>
+    <table id="bus-table">
+        <thead>
+            <tr>
+                <th>_ID</th>
+                <th>Bus_id</th>
+                <th>Bus Name</th>
+                <th>Route_id</th>
+                <th>Time</th>
+                <th>Direction</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Rows will be populated here -->
+        </tbody>
+    </table>
+
+    <!-- Add Bus Form -->
+    <button id="addBusBtn">Add New Bus</button>
+    <div id="busForm" class="hidden">
+        <h3>Add New Bus</h3>
+
+        <!-- Bus Name -->
+        <div id="newbusrow"></div>
+        <button id="addnewrow" onclick="addnewbusrow()">+</button>
+        <button id="saveBusBtn">Save Bus</button>
+    </div>
+
+    <script src="scripts.js"></script>
+    
+</body>
+</html>

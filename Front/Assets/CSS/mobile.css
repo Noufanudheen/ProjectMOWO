@@ -1,0 +1,30 @@
+/* Media Query for Small Screens */
+@media (max-width: 600px) {
+
+    #myLinks {
+        left: -200px;
+    }
+
+    /* Logo in mobile */
+    .header .logo {
+        font-size: 7vw;
+    }
+
+    /* REMOVED: overlay styles, as they're no longer used */
+
+    /* Update container transform for mobile */
+    .container.menu-open {
+        transform: translateX(calc(100% -140px)); /* Slide the menu over */
+    }
+
+    /* Main for mobile  */
+    .main {
+        height: auto;
+        top: 10vh;
+    }
+
+    /* Removed specific box styles, use the general .box styles */
+    .box {
+        width: 89%;  /*  Consistent width for all boxes */
+    }
+}

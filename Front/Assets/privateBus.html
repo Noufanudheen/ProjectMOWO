@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Private Bus</title>
+</head>
+<body>
+    <div class="privbusforumgroup">
+        <div class="privatebusform">
+            <form id="busSearchForm">
+                <label for="From" class="loc-label">From:</label>
+                <div class="loc-select-div">
+                    <input type="text" class="loc-select" id="loc-from" placeholder="Search location...">
+                    <div class="dropdown-content" id="loc-from-options"></div>
+                </div>
+
+                <label for="To" class="loc-label">To:</label>
+                <div class="loc-select-div">
+                    <input type="text" class="loc-select" id="loc-to" placeholder="Search location...">
+                    <div class="dropdown-content" id="loc-to-options"></div>
+                </div>
+                <button type="button" id="searchButton" onclick="handleSearch()">Search</button>
+            </form>
+        </div>
+        <div id="bus-data-container">
+            <div id="direct-bus-data"></div>
+            <div id="connected-bus-data"></div>
+        </div>
+    </div>
+</body>
+</html>
