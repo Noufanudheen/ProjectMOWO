@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="Assets/CSS/style.css">
+    <link rel="stylesheet" href="Assets/CSS/title.css">
+    <link rel="stylesheet" href="Assets/CSS/mobile.css">
+    <title>MOWO - Find Your Bus Route</title>
+</head>
+
+<body>
+    <!-- Navigation Links -->
+    <div id="myLinks" class="menu hidden">
+        <a href="#news">General Notification</a>
+        <a href="#contact">Contact Us</a>
+        <a href="#about">About Us</a>
+        <button class="LoginBtn" id="LoginBtn">Login</button> <!-- Removed onclick -->
+        <div class="footer">©Team 3, CCSIT Manjeri BCA Project</div>
+    </div>
+
+    <div class="menu-backdrop"></div>
+
+    <!-- Main container -->
+    <div class="container">
+        <!-- Title Bar -->
+        <div class="header" id="home">
+            <a href="javascript:void(0);" class="icon" id="menuToggle" aria-label="Toggle Menu"> <!-- Added ID, removed onclick -->
+                <i class="fa fa-bars"></i>
+            </a>
+            <a class="logo" href="#home">MOWO</a>
+            <i class="fa fa-bell notification-icon" id="notificationToggle" aria-label="Notifications"></i> <!-- Added ID, removed onclick -->
+        </div>
+
+        <!-- Main content area -->
+        <main class="main">
+            <!--  Option Boxes (from the first code block) -->
+            <div class="box" id="privateBus">  <!-- Added IDs -->
+                <h3>Private Bus</h3>
+                <div class="box-content">
+                    <div class="dropdown-container">
+                        <input type="text" id="loc-from" class="search-input" placeholder="From Stop">
+                        <div id="loc-from-options" class="dropdown-menu"></div>
+                    </div>
+
+                    <div class="dropdown-container">
+                        <input type="text" id="loc-to" class="search-input" placeholder="To Stop" readonly>
+                        <div id="loc-to-options" class="dropdown-menu"></div>
+                    </div>
+                    <button id="search-btn" class="btn"  disabled>Search</button>
+                     <div id="direct-bus-data"></div>
+                    <div id="connected-bus-data"></div>
+                </div>
+            </div>
+            <div class="box" id="publicBus"> <!-- Added IDs -->
+                <h3>Public Bus</h3>
+                <div class="box-content">
+                    <div class="PublicBusServices" id="PublicBusServices">
+                        <div class="BusServices" id="BusServices">
+                            <!-- Dynamically add Service provider info from DB -->
+                            <div class="item" id="item-1">
+                                <h4>Name</h4>
+                                <p>Brief Description</p>
+                                <p><a href="http://example.com">visit example</a></p>
+                            </div>
+                            <div class="item" id="item-2">
+                                <h4>Name</h4>
+                                <p>Brief Description</p>
+                                <p><a href="http://example.com">visit example</a></p>
+                            </div>
+                            <div class="item" id="item-3">
+                                <h4>Name</h4>
+                                <p>Brief Description</p>
+                                <p><a href="http://example.com">visit example</a></p>
+                            </div>
+                            <div class="item" id="item-4">
+                                <h4>Name</h4>
+                                <p>Brief Description</p>
+                                <p><a href="http://example.com">visit example</a></p>
+                            </div>
+                            <div class="item" id="item-5">
+                                <h4>Name</h4>
+                                <p>Brief Description</p>
+                                <p><a href="http://example.com">visit example</a></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="box" id="travelAgency">  <!-- Added IDs -->
+                <h3>Travel Agencies</h3>
+                <div class="box-content">
+                    <div class="travelAgencyServices" id="travelAgencyServices">
+                        <div class="travelServices" id="travelServices">
+                            <!-- Dynamically add Service provider info from DB -->
+                            <div class="item" id="item-1">
+                                <h4>Name</h4>
+                                <p>Brief Description</p>
+                                <p><a href="http://example.com">contact</a></p>
+                            </div>
+                            <div class="item" id="item-2">
+                                <h4>Name</h4>
+                                <p>Brief Description</p>
+                                <p><a href="http://example.com">contact</a></p>
+                            </div>
+                            <div class="item" id="item-3">
+                                <h4>Name</h4>
+                                <p>Brief Description</p>
+                                <p><a href="http://example.com">contact</a></p>
+                            </div>
+                            <div class="item" id="item-4">
+                                <h4>Name</h4>
+                                <p>Brief Description</p>
+                                <p><a href="http://example.com">contact</a></p>
+                            </div>
+                            <div class="item" id="item-5">
+                                <h4>Name</h4>
+                                <p>Brief Description</p>
+                                <p><a href="http://example.com">contact</a></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--  End of Option Boxes -->
+        </main>
+    </div>
+
+    <script type="module" src="Assets/JS/Cscripts.js"></script>
+</body>
+
+</html>
