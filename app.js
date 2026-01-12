@@ -34,6 +34,8 @@ app.use(cors(corsOptions));
 // Middleware setup
 app.use(express.json());
 app.use(express.static('public'));
+app.use('/Front', express.static('Front'));
+app.use(express.static(__dirname));
 // -------------------------
 // Fetch All Data
 // -------------------------
