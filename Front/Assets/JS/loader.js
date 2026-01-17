@@ -1,6 +1,6 @@
 
 // Simple IndexedDB Wrapper
-const dbName = 'MowoCache';
+const dbName = 'MowoCache_v2';
 const storeName = 'dataStore';
 
 function openDB() {
