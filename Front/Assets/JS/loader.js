@@ -49,6 +49,25 @@ function updateProgress(percent, message) {
     if (text) text.textContent = message || `Loading... ${percent}%`;
 }
 
+// Helper to execute script in global scope
+function executeGlobalScript(content) {
+    return new Promise((resolve, reject) => {
+        const blob = new Blob([content], { type: 'text/javascript' });
+        const url = URL.createObjectURL(blob);
+        const script = document.createElement('script');
+        script.src = url;
+        script.onload = () => {
+            URL.revokeObjectURL(url);
+            resolve();
+        };
+        script.onerror = (e) => {
+            URL.revokeObjectURL(url);
+            reject(e);
+        };
+        document.body.appendChild(script);
+    });
+}
+
 // Main Loader Logic
 async function initApp() {
     updateProgress(0, 'Initialize...');
@@ -87,7 +106,9 @@ async function initApp() {
             updateProgress(80, 'Processing cached data...');
             // Add a small delay for UI to register
             await new Promise(r => setTimeout(r, 100));
-            eval(dataScript); // Execute the cached script
+
+            await executeGlobalScript(dataScript); // Execute via Blob
+
         } else {
             console.log("Downloading data...");
             updateProgress(10, 'Downloading data...');
@@ -128,8 +149,12 @@ async function initApp() {
                     console.warn("Failed to cache data:", e);
                 }
 
-                // 4. Execute
-                eval(dataScript);
+                // 4. Execute Globally (via Blob)
+                updateProgress(98, 'Initializing data...');
+                await executeGlobalScript(dataScript);
+
+                // 200ms delay to ensure everything is settled (optional but safe)
+                await new Promise(r => setTimeout(r, 200));
 
             } catch (fetchError) {
                 console.warn("Fetch failed, falling back to script tag...", fetchError);
@@ -140,7 +165,7 @@ async function initApp() {
                     script.src = pathPrefix + 'data.js';
                     script.onload = () => {
                         resolve();
-                        loadApp(pathPrefix);
+                        loadApp(pathPrefix); // This line was moved to after the promise in the original code, but here it's inside the fallback.
                     };
                     script.onerror = reject;
                     document.body.appendChild(script);
