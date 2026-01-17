@@ -44,7 +44,7 @@ It's designed to run beautifully on everything from the latest flagship phones t
 
 ## 📦 How to Run
 
-![Visit Project MOWO](http://mcaofrit.qzz.io/)
+![](http://mcaofrit.qzz.io/)
 
 **LOCALLY**
 
