@@ -1,17 +1,12 @@
 // combined_script.js - Combined database interaction, UI logic, and route finding
+// NOTE: This is a fully static version. Data is embedded in data.js
 
-// --- Constants ---
-const API_URL = 'http://localhost:3000/api'; // Replace with your actual API URL
-const STOPS_ENDPOINT = `${API_URL}/stops`;
-const ROUTES_ENDPOINT = `${API_URL}/routes`;
-const ROUTE_STOPS_ENDPOINT = `${API_URL}/route_stops`;
-const BUSES_ENDPOINT = `${API_URL}/bus`;
-
+// --- Constants (API removed - using embedded data) ---
 const LOADING_MESSAGE = "Searching for routes...";
 const NO_RESULTS_MESSAGE = "No routes found. Please try different stops.";
-const DEBOUNCE_DELAY = 250; // Not currently used
+const DEBOUNCE_DELAY = 250;
 
-// --- Data (to be populated from API) ---
+// --- Data (populated from embedded data.js) ---
 let stopsData = [];
 let routesData = [];
 let busesData = [];
@@ -21,72 +16,109 @@ let routeStopsData = [];
 let icon, logo, bellIcon, container, menu, backdrop;
 let currentState = null;
 
-// --- Database Interaction Functions ---
+// --- Data Initialization (from embedded data.js) ---
+function initializeEmbeddedData() {
+    // EMBEDDED_STOPS, EMBEDDED_ROUTES, and EMBEDDED_BUSES are defined in data.js
+    // Transform to match expected format
 
-async function fetchAllData() {
-    try {
-        const [stopsResponse, routesResponse, busesResponse, routeStopsResponse] = await Promise.all([
-            fetch(STOPS_ENDPOINT),
-            fetch(ROUTES_ENDPOINT),
-            fetch(BUSES_ENDPOINT),
-            fetch(ROUTE_STOPS_ENDPOINT)
-        ]);
+    // Stops: { stop_id, stop_name, lat, lon }
+    stopsData = EMBEDDED_STOPS.map(s => ({
+        stop_id: s.id,
+        stop_name: s.name || "Unnamed Stop",
+        lat: s.latitude,
+        lon: s.longitude
+    }));
 
-        if (!stopsResponse.ok || !routesResponse.ok || !busesResponse.ok || !routeStopsResponse.ok) {
-            throw new Error("Failed to fetch data from one or more endpoints.");
-        }
+    // Routes: { route_id, route_name, from_stop_id, to_stop_id }
+    routesData = EMBEDDED_ROUTES.routes.map(r => ({
+        route_id: r.route_id,
+        route_name: r.route_name || `${r.route_id}`,
+        from_stop_id: r.from_stop_id,
+        to_stop_id: r.to_stop_id,
+        distance_km: r.distance_km
+    }));
 
-        stopsData = await stopsResponse.json();
-        routesData = await routesResponse.json();
-        busesData = await busesResponse.json();
-        routeStopsData = await routeStopsResponse.json();
+    // Buses: Now from separate EMBEDDED_BUSES array
+    busesData = EMBEDDED_BUSES.buses.map(bus => ({
+        _id: bus.bus_id,
+        bus_id: bus.bus_id,
+        bus_name: "Private Bus",
+        route_id: bus.route_id,
+        time: bus.departure_time,
+        direction: "Forward"
+    }));
 
-        // Pre-sort routeStopsData by route_id and stop_order *once*.  This is an optimization.
-        routeStopsData.sort((a, b) => {
-            if (a.route_id !== b.route_id) {
-                return a.route_id - b.route_id; // Sort by route_id first
-            }
-            return a.stop_order - b.stop_order; // Then by stop_order
+    // Route Stops: In new format, routes are direct (from -> to), so create 2 entries per route
+    routeStopsData = [];
+    EMBEDDED_ROUTES.routes.forEach(route => {
+        const fromStop = EMBEDDED_STOPS.find(s => s.id === route.from_stop_id);
+        const toStop = EMBEDDED_STOPS.find(s => s.id === route.to_stop_id);
+
+        routeStopsData.push({
+            route_id: route.route_id,
+            stop_id: route.from_stop_id,
+            stop_name: fromStop ? fromStop.name : "Unknown",
+            stop_order: 1
         });
+        routeStopsData.push({
+            route_id: route.route_id,
+            stop_id: route.to_stop_id,
+            stop_name: toStop ? toStop.name : "Unknown",
+            stop_order: 2
+        });
+    });
 
-        console.log('Stops Data:', stopsData);
-        console.log('Routes Data:', routesData);
-        console.log('Buses Data:', busesData);
-        console.log('Route Stops Data:', routeStopsData);
-
-    } catch (error) {
-        console.error("Error fetching all data:", error);
-        alert("Failed to load data. Please check your internet connection.");
-        throw error; // Re-throw the error
-    }
+    console.log('Embedded Data Loaded:', stopsData.length, 'stops,', routesData.length, 'routes,', busesData.length, 'buses');
 }
 
-// --- findRoutes (Direct Route) - Correct and Efficient ---
+// Legacy compatibility: fetchAllData now just calls initializeEmbeddedData
+async function fetchAllData() {
+    initializeEmbeddedData();
+}
+
+// --- findRoutes (Direct Route) - Match by stop name since IDs don't match ---
 async function findRoutes(fromStopId, toStopId) {
-    console.log('findRoutes (direct) called:', fromStopId, toStopId);
+    console.log('findRoutes called with IDs:', fromStopId, toStopId);
 
-    const fromStopRoutes = routeStopsData.filter(rs => rs.stop_id === parseInt(fromStopId)); //parseInt to make sure it's int
-    const toStopRoutes = routeStopsData.filter(rs => rs.stop_id === parseInt(toStopId));
+    // Look up stop names from IDs (stopsData uses stop_id, routes use different IDs)
+    const fromStop = stopsData.find(s => s.stop_id === fromStopId);
+    const toStop = stopsData.find(s => s.stop_id === toStopId);
 
-    const directRoutes = [];
-
-    for (const fromRs of fromStopRoutes) {
-        for (const toRs of toStopRoutes) {
-            if (fromRs.route_id === toRs.route_id) { // Same route!
-                const buses = getBusesOnRoute(fromRs.route_id);
-                for (const bus of buses) {
-                    // Check direction *and* stop order.  This is the key.
-                    if (bus.direction === "Direct" && fromRs.stop_order < toRs.stop_order) {
-                        directRoutes.push(bus);
-                    } else if (bus.direction === "Reverse" && fromRs.stop_order > toRs.stop_order) {
-                        directRoutes.push(bus);
-                    }
-                }
-            }
-        }
+    if (!fromStop || !toStop) {
+        console.log('Stop not found in stopsData');
+        return [];
     }
-    console.log("directRoutes", directRoutes)
-    return directRoutes; // Returns an array of *bus* objects
+
+    const fromName = fromStop.stop_name.toLowerCase().trim();
+    const toName = toStop.stop_name.toLowerCase().trim();
+
+    console.log('Searching for routes from:', fromName, 'to:', toName);
+
+    // Match routes by route_name which contains "from_name to to_name"
+    const matchingRoutes = routesData.filter(route => {
+        const routeName = route.route_name.toLowerCase();
+        // Route names are formatted as "From Stop to To Stop"
+        return routeName.includes(fromName) && routeName.includes(toName) &&
+            routeName.indexOf(fromName) < routeName.indexOf(toName);
+    });
+
+    console.log('Matching routes found:', matchingRoutes.length);
+
+    // Get all buses for these routes
+    const directBuses = [];
+    for (const route of matchingRoutes) {
+        const buses = getBusesOnRoute(route.route_id);
+        buses.forEach(bus => {
+            directBuses.push({
+                ...bus,
+                route_name: route.route_name,
+                distance_km: route.distance_km
+            });
+        });
+    }
+
+    console.log("directBuses found:", directBuses.length);
+    return directBuses;
 }
 
 // --- findConnectedRoutes (BFS, Time-Based) - Correct and Optimized ---
@@ -107,7 +139,7 @@ async function findConnectedRoutes(fromStopId, toStopId) {
             const routeIds = path.map(p => p.routeId).filter(r => r !== null);
             const buses = routeIds.flatMap(routeId => getBusesOnRoute(routeId));
             console.log("Connected Path Found:", { routes: routeIds, buses: buses, totalTime: totalTime });
-             // Return path, buses, and total time
+            // Return path, buses, and total time
             return { routes: routeIds, buses: buses, totalTime: totalTime };
         }
 
@@ -130,7 +162,7 @@ async function findConnectedRoutes(fromStopId, toStopId) {
                     queue.push({
                         stopId: nextStop.stop_id,
                         routeId: nextRouteId,
-                         // Store timeToNext.
+                        // Store timeToNext.
                         path: [...path, { routeId: nextRouteId, stopId: stopId, timeToNext: timeToNext }],
                         totalTime: totalTime + timeToNext
                     });
@@ -221,10 +253,13 @@ document.addEventListener('DOMContentLoaded', () => {
     backdrop = document.querySelector(".menu-backdrop");
 
     // Event listeners
-    document.getElementById("LoginBtn").style.display = "none";
-    document.getElementById("LoginBtn").addEventListener('click', () => {
-        window.location.href = 'Assets/Login.html';
-    });
+    const loginBtn = document.getElementById("LoginBtn");
+    if (loginBtn) {
+        loginBtn.style.display = "none";
+        loginBtn.addEventListener('click', () => {
+            window.location.href = 'Assets/Login.html';
+        });
+    }
     document.getElementById("menuToggle").addEventListener('click', toggleMenu);
     document.getElementById("notificationToggle").addEventListener('click', toggleNotifications);
 
@@ -270,7 +305,7 @@ function setupDropdown(inputId, dropdownId) {
     // --- Important: No longer readonly ---
     inputElement.readOnly = false;
 
-     inputElement.addEventListener("click", (event) => {
+    inputElement.addEventListener("click", (event) => {
         event.stopPropagation();
         dropdownElement.style.display = "block";
         loadStops(dropdownElement, inputElement);
@@ -282,7 +317,7 @@ function setupDropdown(inputId, dropdownId) {
     });
 
     // Close dropdown when clicking outside
-   document.addEventListener("click", (event) => {
+    document.addEventListener("click", (event) => {
         if (!inputElement.contains(event.target) && !dropdownElement.contains(event.target)) {
             dropdownElement.style.display = "none";
         }
@@ -304,10 +339,56 @@ function loadStops(dropdown, inputElement) {
 }
 
 function populateDropdown(stops, dropdown, inputElement) {
-    // No sorting here, we'll sort on filter
+    // Optimization: Do NOT render all 17,000 stops immediately.
+    // Just clear and maybe show a prompt or the first few if manageable.
     dropdown.innerHTML = "";
 
-    stops.forEach(stop => {
+    // Optional: Render first 20 just so it's not empty?
+    // Or better, just wait for input. Let's render first 20.
+    const initialBatch = stops.slice(0, 20);
+    renderDropdownItems(initialBatch, dropdown, inputElement);
+}
+
+// --- NEW: Filter Function with Dynamic Rendering ---
+function filterStops(inputElement, dropdownElement) {
+    const filterValue = inputElement.value.toLowerCase();
+
+    if (!filterValue) {
+        // If empty, show default list (e.g. first 20)
+        populateDropdown(stopsData, dropdownElement, inputElement);
+        return;
+    }
+
+    // Filter raw data
+    // Note: stopsData is available globally
+    const filtered = stopsData.filter(stop =>
+        stop.stop_name.toLowerCase().includes(filterValue)
+    );
+
+    // Sort? (Optional, maybe expensive on large arrays every keystroke, but okay for filter)
+    // filtered.sort((a, b) => a.stop_name.localeCompare(b.stop_name));
+
+    // Limit to 50
+    const results = filtered.slice(0, 50);
+
+    // Render
+    renderDropdownItems(results, dropdownElement, inputElement);
+}
+
+// Helper to render items (extracted to avoid duplication)
+function renderDropdownItems(items, dropdown, inputElement) {
+    dropdown.innerHTML = "";
+
+    if (items.length === 0) {
+        const msg = document.createElement("div");
+        msg.classList.add("dropdown-item");
+        msg.textContent = "No stops found";
+        msg.style.pointerEvents = "none";
+        dropdown.appendChild(msg);
+        return;
+    }
+
+    items.forEach(stop => {
         const option = document.createElement("div");
         option.classList.add("dropdown-item");
         option.textContent = stop.stop_name;
@@ -321,31 +402,8 @@ function populateDropdown(stops, dropdown, inputElement) {
         });
         dropdown.appendChild(option);
     });
-     filterStops(inputElement, dropdown); //  Initially filter
-}
 
-// --- NEW: Filter Function ---
-function filterStops(inputElement, dropdownElement) {
-    const filterValue = inputElement.value.toLowerCase();
-
-    // Get all dropdown items
-    const items = dropdownElement.querySelectorAll('.dropdown-item');
-
-    // Convert the NodeList to an array for easier manipulation
-    const itemsArray = Array.from(items);
-
-    // Sort the array alphabetically by textContent
-    itemsArray.sort((a, b) => a.textContent.localeCompare(b.textContent));
-
-    // Apply filtering and display
-    itemsArray.forEach(item => {
-    const stopName = item.textContent.toLowerCase();
-        if (stopName.includes(filterValue)) {
-            item.style.display = "block"; // Show matching items
-        } else {
-            item.style.display = "none";  // Hide non-matching items
-        }
-    });
+    dropdown.style.display = "block";
 }
 
 //Enables or disables the search button based on stop selection
@@ -436,19 +494,19 @@ function displayNoResults() {
 
 // --- Option Handlers ---
 function handlepublicBusClick(event) {
-      if (event.target.classList.contains('back-btn')) {
-            collapseBox(event);
-        } else {
-            expandSearchBox(document.getElementById("publicBus"));
-        }
+    if (event.target.classList.contains('back-btn')) {
+        collapseBox(event);
+    } else {
+        expandSearchBox(document.getElementById("publicBus"));
+    }
 }
 
 function handletravelAgencyClick(event) {
-      if (event.target.classList.contains('back-btn')) {
-            collapseBox(event);
-        } else {
-            expandSearchBox(document.getElementById("travelAgency"));
-        }
+    if (event.target.classList.contains('back-btn')) {
+        collapseBox(event);
+    } else {
+        expandSearchBox(document.getElementById("travelAgency"));
+    }
 }
 
 // Combined Data Loading and UI Initialization
@@ -463,23 +521,23 @@ async function initializeDataAndUI() {
 // --- Navigation and State Management ---
 
 window.addEventListener('popstate', (event) => {
-  switch (currentState) {
-    case 'menu':      collapseMenu(); break;
-    case 'searchBox': collapseBox(event); break;
-    case 'notification': collapseNotifications(); break;
-    default:          redirectToHomePage();
-  }
+    switch (currentState) {
+        case 'menu': collapseMenu(); break;
+        case 'searchBox': collapseBox(event); break;
+        case 'notification': collapseNotifications(); break;
+        default: redirectToHomePage();
+    }
 });
 
 function redirectToHomePage() {
     window.location.href = "#home";
     showheaderIcons();
     currentState = null;
-      const expandedBox = document.querySelector(".box.expanded");
-        if (expandedBox) {
-            const mockEvent = { stopPropagation: () => {} };
-            collapseBox(mockEvent);
-        }
+    const expandedBox = document.querySelector(".box.expanded");
+    if (expandedBox) {
+        const mockEvent = { stopPropagation: () => { } };
+        collapseBox(mockEvent);
+    }
 
     history.replaceState({}, null, location.pathname);
 }
@@ -492,10 +550,16 @@ function toggleMenu() {
 }
 
 function expandMenu() {
+    if (menu) menu.classList.remove("hidden");
     container.classList.add("menu-open");
     backdrop.classList.add("menu-open");
-    document.getElementById("LoginBtn").style.display = "block";
-    menu.style.transform = "translateX(200px)";
+    const loginBtn = document.getElementById("LoginBtn");
+    if (loginBtn) loginBtn.style.display = "block";
+
+    // Tiny delay to ensure transition happens if display changed
+    setTimeout(() => {
+        menu.style.transform = "translateX(200px)";
+    }, 10);
 
     hideHeaderIcons();
     currentState = 'menu';
@@ -505,8 +569,14 @@ function expandMenu() {
 function collapseMenu() {
     container.classList.remove("menu-open");
     backdrop.classList.remove("menu-open");
-    document.getElementById("LoginBtn").style.display = "none";
+    const loginBtn = document.getElementById("LoginBtn");
+    if (loginBtn) loginBtn.style.display = "none";
     menu.style.transform = "translateX(0)";
+
+    // Add hidden after transition (0.6s)
+    setTimeout(() => {
+        if (menu) menu.classList.add("hidden");
+    }, 600);
 
     showheaderIcons();
     currentState = null;
@@ -529,6 +599,18 @@ function expandSearchBox(box) {
     const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
     const startTop = rect.top + scrollTop;
     const endTop = window.innerHeight * -0.07;
+
+    // --- Create Spacer to prevent layout shift ---
+    const spacer = document.createElement('div');
+    spacer.style.height = `${rect.height}px`;
+    // box.style.width is typically %, compute exact or copy
+    spacer.style.width = getComputedStyle(box).width;
+    spacer.style.margin = getComputedStyle(box).margin;
+    // spacer.style.display = 'block'; // Default div
+    spacer.style.visibility = 'hidden'; // Invisible placeholder
+    box.parentNode.insertBefore(spacer, box);
+    box.spacerElement = spacer; // Store reference directly
+    // ---------------------------------------------
 
     box.dataset.originalTop = startTop;
     box.style.top = `${startTop}px`;
@@ -569,6 +651,12 @@ function collapseBox(event) {
 
         box.style.top = "";
         delete box.dataset.originalTop;
+
+        // Remove Spacer
+        if (box.spacerElement) {
+            box.spacerElement.remove();
+            box.spacerElement = null;
+        }
     }, 300);
 
     const fromInput = box.querySelector("#loc-from");
@@ -621,7 +709,7 @@ function expandNotifications() {
     document.body.appendChild(notificationsDiv);
 
     setTimeout(() => notificationsDiv.classList.add('visible'), 10);
-     hideHeaderIcons();
+    hideHeaderIcons();
     const originalText = logo.textContent;
     logo.setAttribute("data-original-text", originalText);
     logo.innerHTML = `<i class="fa fa-arrow-left"></i> ${originalText}`;
@@ -653,11 +741,11 @@ function collapseNotifications() {
 // -------------------------------
 
 function debounce(func, delay) {
-  let timeoutId;
-  return function(...args) {
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => func.apply(this, args), delay);
-  };
+    let timeoutId;
+    return function (...args) {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => func.apply(this, args), delay);
+    };
 }
 
 document.addEventListener("click", (event) => {
@@ -679,4 +767,66 @@ function showheaderIcons() {
     icon.classList.remove("hidden");
     logo.classList.remove("hidden");
     bellIcon.classList.remove("hidden");
+}
+
+// --- AUTO-INITIALIZATION ---
+function initializeApp() {
+    console.log("Initializing App...");
+
+    // 1. Initialize DOM references (Assign to globals)
+    icon = document.querySelector(".icon");
+    logo = document.querySelector(".logo");
+    bellIcon = document.querySelector(".notification-icon");
+    container = document.querySelector(".container");
+    menu = document.getElementById("myLinks");
+    backdrop = document.querySelector(".menu-backdrop");
+
+    // 2. Setup menu listeners
+    const menuToggle = document.getElementById("menuToggle");
+    if (menuToggle) menuToggle.addEventListener('click', toggleMenu);
+
+    const notifToggle = document.getElementById("notificationToggle");
+    if (notifToggle) notifToggle.addEventListener('click', toggleNotifications);
+
+    if (logo) logo.addEventListener("click", redirectToHomePage);
+
+    const loginBtn = document.getElementById("LoginBtn");
+    if (loginBtn) {
+        loginBtn.style.display = "none";
+        loginBtn.addEventListener('click', () => {
+            // window.location.href = 'Assets/Login.html'; // Keep disabled for now
+        });
+    }
+
+    // 3. Setup Box Listeners (Use existing function!)
+    // This sets up interactions AND dropdowns for search
+    if (typeof setupBoxEventListeners === 'function') {
+        setupBoxEventListeners();
+    } else {
+        console.error("setupBoxEventListeners not found!");
+    }
+
+    // 4. Load Data
+    if (typeof initializeDataAndUI === 'function') {
+        initializeDataAndUI();
+    } else {
+        initializeEmbeddedData();
+    }
+
+    // 5. Hide Loading Screen
+    const loader = document.getElementById('loading-overlay');
+    if (loader) {
+        loader.style.opacity = '0';
+        setTimeout(() => {
+            loader.style.display = 'none';
+        }, 500);
+    }
+
+    console.log("App Initialized.");
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeApp);
+} else {
+    initializeApp();
 }

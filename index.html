@@ -12,12 +12,21 @@
 </head>
 
 <body>
+    <!-- Loading Screen -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="spinner"></div>
+        <div class="loading-text" id="loading-text">Loading Data...</div>
+        <div class="loading-bar-container">
+            <div class="loading-bar" id="loading-bar"></div>
+        </div>
+    </div>
+
     <!-- Navigation Links -->
     <div id="myLinks" class="menu hidden">
+
         <a href="#news">General Notification</a>
         <a href="#contact">Contact Us</a>
         <a href="#about">About Us</a>
-        <button class="LoginBtn" id="LoginBtn">Login</button> <!-- Removed onclick -->
         <div class="footer">©Team 3, CCSIT Manjeri BCA Project</div>
     </div>
 
@@ -27,17 +36,19 @@
     <div class="container">
         <!-- Title Bar -->
         <div class="header" id="home">
-            <a href="javascript:void(0);" class="icon" id="menuToggle" aria-label="Toggle Menu"> <!-- Added ID, removed onclick -->
+            <a href="javascript:void(0);" class="icon" id="menuToggle" aria-label="Toggle Menu">
+                <!-- Added ID, removed onclick -->
                 <i class="fa fa-bars"></i>
             </a>
             <a class="logo" href="#home">MOWO</a>
-            <i class="fa fa-bell notification-icon" id="notificationToggle" aria-label="Notifications"></i> <!-- Added ID, removed onclick -->
+            <i class="fa fa-bell notification-icon" id="notificationToggle" aria-label="Notifications"></i>
+            <!-- Added ID, removed onclick -->
         </div>
 
         <!-- Main content area -->
         <main class="main">
             <!--  Option Boxes (from the first code block) -->
-            <div class="box" id="privateBus">  <!-- Added IDs -->
+            <div class="box" id="privateBus"> <!-- Added IDs -->
                 <h3>Private Bus</h3>
                 <div class="box-content">
                     <div class="dropdown-container">
@@ -49,8 +60,8 @@
                         <input type="text" id="loc-to" class="search-input" placeholder="To Stop" readonly>
                         <div id="loc-to-options" class="dropdown-menu"></div>
                     </div>
-                    <button id="search-btn" class="btn"  disabled>Search</button>
-                     <div id="direct-bus-data"></div>
+                    <button id="search-btn" class="btn" disabled>Search</button>
+                    <div id="direct-bus-data"></div>
                     <div id="connected-bus-data"></div>
                 </div>
             </div>
@@ -89,7 +100,7 @@
                     </div>
                 </div>
             </div>
-            <div class="box" id="travelAgency">  <!-- Added IDs -->
+            <div class="box" id="travelAgency"> <!-- Added IDs -->
                 <h3>Travel Agencies</h3>
                 <div class="box-content">
                     <div class="travelAgencyServices" id="travelAgencyServices">
@@ -128,7 +139,7 @@
         </main>
     </div>
 
-    <script type="module" src="Front/Assets/JS/Cscripts.js"></script>
+    <script src="Front/Assets/JS/loader.js"></script>
 </body>
 
 </html>
